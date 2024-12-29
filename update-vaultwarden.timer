@@ -1,0 +1,11 @@
+[Unit]
+Description = Keep vaultwarden docker container up to date
+Requires = docker.service docker.socket
+
+[Timer]
+OnCalendar = weekly
+Persistent = true
+RandomizedDelaySec = 1h
+
+[Install]
+WantedBy = timers.target

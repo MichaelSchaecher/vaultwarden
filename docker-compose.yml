@@ -1,0 +1,42 @@
+services:
+
+  vaultwarden-db:
+    image: mariadb:latest
+    container_name: vaultwarden-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWD}
+      MYSQL_DATABASE: 'vaultwarden'
+      MYSQL_USER: 'vaultwarden'
+      MYSQL_PASSWORD: ${VAULTWARDEN_PASSWD}
+    volumes:
+      - /vw-data:/var/lib/mysql
+    healthcheck:
+      test: mariadb-admin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    depends_on:
+      vaultwarden-db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - 80:80
+    environment:
+      DATABASE_URL: 'mysql://vaultwarden:${VAULTWARDEN_PASSWD}@vaultwarden-db/vaultwarden'
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      DOMAIN: ${DOMAIN_NAME}
+    volumes:
+      - /vw-data:/data
+      - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  vw-data:
+

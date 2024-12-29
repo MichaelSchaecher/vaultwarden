@@ -1,0 +1,10 @@
+[Unit]
+Description = Keep vaultwarden docker container up to date
+
+[Service]
+Type = oneshot
+ExecStartPre = /usr/bin/docker compose -f /etc/vaultwarden/docker-compose.yml down
+ExecStart = /usr/bin/docker compose -f /etc/vaultwarden/docker-compose.yml up -d
+
+[Install]
+WantedBy = multi-user.target
